@@ -1,0 +1,119 @@
+package me.mrgermanrain.moresoup;
+
+import java.util.logging.Logger;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MoreSoup extends JavaPlugin {
+    
+	private final MoreSoupEvents playerListener = new MoreSoupEvents();
+   
+    public final Logger logger = Logger.getLogger("Minecraft");
+    
+    @Override
+    public void onDisable() {
+    	PluginDescriptionFile p = this.getDescription();
+		this.logger.info(p.getName() + " V" + p.getVersion() + "Has been disabled!");
+    }
+
+    @Override
+    public void onEnable() {
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(playerListener, this);
+
+        getCommand("moresoup").setExecutor(new MoreSoupCommands());
+        getCommand("ms").setExecutor(new MoreSoupCommands());
+
+        PluginDescriptionFile p = this.getDescription();
+        this.logger.info(p.getName() + " V" + p.getVersion() + "Has been enabled!");
+        Server server = this.getServer();
+        
+        this.getConfig().options().copyDefaults(true);
+        this.saveConfig();
+        
+             
+        ItemStack cactusStack = new ItemStack(Material.MUSHROOM_SOUP);
+        ItemMeta cactusMeta = cactusStack.getItemMeta();
+        cactusMeta.setDisplayName("Cacti Juice");
+        cactusStack.setItemMeta(cactusMeta);
+        ShapelessRecipe cactus = new ShapelessRecipe(cactusStack);
+        cactus.addIngredient(2, Material.CACTUS);
+        cactus.addIngredient(1, Material.BOWL);
+        
+        server.addRecipe(cactus);
+        
+        ItemStack AppleStack = new ItemStack(Material.MUSHROOM_SOUP);
+        ItemMeta AppleMeta = AppleStack.getItemMeta();
+        AppleMeta.setDisplayName("Apple Juice");
+        AppleStack.setItemMeta(AppleMeta);
+        ShapelessRecipe apple = new ShapelessRecipe(AppleStack);
+        apple.addIngredient(1, Material.APPLE);
+        apple.addIngredient(1, Material.BOWL);
+    
+        server.addRecipe(apple);
+        
+        ItemStack milkStack = new ItemStack(Material.MUSHROOM_SOUP);
+        ItemMeta milkMeta = milkStack.getItemMeta();
+        milkMeta.setDisplayName("Chocolate Milk");
+        milkStack.setItemMeta(milkMeta);
+        ShapelessRecipe milk = new ShapelessRecipe(milkStack);
+        milk.addIngredient(2, Material.INK_SACK, 3);
+        milk.addIngredient(1, Material.BOWL);
+        
+        server.addRecipe(milk);
+	}
+	
+    boolean sh = getConfig().getBoolean("soupheals");
+	int hps = getConfig().getInt("hps");
+
+	public boolean onCommand(CommandSender s, Command cmd, String Label, String[] args) {
+		if(cmd.getName().equalsIgnoreCase("Ms") && args.length >= 0) {
+			Player player = (Player) s;
+			if (player.isOp()){
+				if (args[0].equalsIgnoreCase("config"))
+					if (args.length == 0){
+						player.sendMessage(ChatColor.DARK_BLUE + "/ms config");
+						player.sendMessage(ChatColor.DARK_BLUE + "/ms config soupheal (on/off)");
+						player.sendMessage(ChatColor.DARK_BLUE + "/ms config hps [number]");
+					}	
+				if (args[1].equalsIgnoreCase("soupheal")) {
+					if (args.length == 1){
+						player.sendMessage(ChatColor.DARK_BLUE + "/ms config soupheal (on/off)");
+					}
+					if (args.length == 2){
+						if (args[2].equalsIgnoreCase("off")) {
+							this.getConfig().set("soupheals", false);
+						}
+						if (args[2].equalsIgnoreCase("on")) {
+							this.getConfig().set("soupheals", true);
+						}
+					}
+				}
+				if (args[1].equalsIgnoreCase("hps")) {
+					if (args.length == 1) {
+						player.sendMessage(ChatColor.DARK_BLUE + "/ms config hps [number]");
+					}
+					if (args.length == 2) {
+						if (Integer.valueOf(args[2]).equals(args[2])){
+							this.getConfig().set("hps", args[2]);
+							} else {
+						player.sendMessage(ChatColor.DARK_BLUE + "Your input is not an integer!");
+						} 
+					}
+				}
+			}
+		}
+		return false;
+	}
+}
